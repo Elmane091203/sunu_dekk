@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 
 import '../app/router.dart';
 import '../app/theme.dart';
+import '../core/auth/permission_service.dart';
+import '../core/auth/privilege.dart';
 import 'responsive.dart';
 import 'sunu_logo.dart';
 
@@ -14,7 +16,7 @@ class AppShell extends ConsumerWidget {
   final String location;
   const AppShell({super.key, required this.child, required this.location});
 
-  static const _destinations = <_NavDest>[
+  static const _allDestinations = <_NavDest>[
     _NavDest(
       route: AppRoute.dashboard,
       icon: Icons.dashboard_outlined,
@@ -26,12 +28,14 @@ class AppShell extends ConsumerWidget {
       icon: Icons.folder_outlined,
       selectedIcon: Icons.folder,
       label: 'Dossiers',
+      required: Privilege.gererDossiers,
     ),
     _NavDest(
       route: AppRoute.team,
       icon: Icons.groups_outlined,
       selectedIcon: Icons.groups,
       label: 'Équipe',
+      required: Privilege.gererUtilisateurs,
     ),
     _NavDest(
       route: AppRoute.demarches,
@@ -47,16 +51,23 @@ class AppShell extends ConsumerWidget {
     ),
   ];
 
-  int _indexFor(String loc) {
-    for (var i = 0; i < _destinations.length; i++) {
-      if (loc.startsWith(_destinations[i].route)) return i;
+  int _indexFor(String loc, List<_NavDest> destinations) {
+    for (var i = 0; i < destinations.length; i++) {
+      if (loc.startsWith(destinations[i].route)) return i;
     }
     return 0;
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final idx = _indexFor(location);
+    final perms = ref.watch(permissionServiceProvider);
+    // Une destination protegee disparait completement si le privilege manque.
+    // L'AGENT ne voit jamais ce qu'il ne peut pas faire.
+    final destinations = [
+      for (final d in _allDestinations)
+        if (d.required == null || perms.has(d.required!)) d,
+    ];
+    final idx = _indexFor(location, destinations);
     final isTablet = context.isTablet;
 
     if (!isTablet) {
@@ -64,9 +75,9 @@ class AppShell extends ConsumerWidget {
         body: child,
         bottomNavigationBar: NavigationBar(
           selectedIndex: idx,
-          onDestinationSelected: (i) => context.go(_destinations[i].route),
+          onDestinationSelected: (i) => context.go(destinations[i].route),
           destinations: [
-            for (final d in _destinations)
+            for (final d in destinations)
               NavigationDestination(
                 icon: Icon(d.icon),
                 selectedIcon: Icon(d.selectedIcon),
@@ -83,9 +94,9 @@ class AppShell extends ConsumerWidget {
         child: Row(
           children: [
             _SideRail(
-              destinations: _destinations,
+              destinations: destinations,
               selectedIndex: idx,
-              onSelected: (i) => context.go(_destinations[i].route),
+              onSelected: (i) => context.go(destinations[i].route),
               expanded: context.isDesktop,
             ),
             const VerticalDivider(width: 1),
@@ -202,10 +213,12 @@ class _NavDest {
   final IconData icon;
   final IconData selectedIcon;
   final String label;
+  final Privilege? required;
   const _NavDest({
     required this.route,
     required this.icon,
     required this.selectedIcon,
     required this.label,
+    this.required,
   });
 }

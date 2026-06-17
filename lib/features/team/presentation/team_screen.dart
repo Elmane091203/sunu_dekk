@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 
 import '../../../app/router.dart';
 import '../../../app/theme.dart';
+import '../../../core/auth/permission_service.dart';
+import '../../../core/auth/privilege.dart';
 import '../../../shared_ui/empty_view.dart';
 import '../../../shared_ui/responsive.dart';
 import '../../../shared_ui/section_card.dart';
@@ -20,6 +22,8 @@ class TeamScreen extends ConsumerWidget {
     final agents = ref.watch(agentListProvider);
     final perf = ref.watch(agentPerformanceProvider);
     final isTablet = context.isTablet;
+    final canManage =
+        ref.watch(permissionServiceProvider).has(Privilege.gererUtilisateurs);
 
     return Scaffold(
       backgroundColor: sdScaffoldBg,
@@ -35,19 +39,21 @@ class TeamScreen extends ConsumerWidget {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () async {
-          final ok = await CreateAgentSheet.show(context);
-          if (ok == true) {
-            ref.invalidate(agentListProvider);
-            ref.invalidate(agentPerformanceProvider);
-          }
-        },
-        backgroundColor: sdGreenBaobab,
-        foregroundColor: Colors.white,
-        icon: const Icon(Icons.person_add_outlined),
-        label: const Text('Ajouter'),
-      ),
+      floatingActionButton: canManage
+          ? FloatingActionButton.extended(
+              onPressed: () async {
+                final ok = await CreateAgentSheet.show(context);
+                if (ok == true) {
+                  ref.invalidate(agentListProvider);
+                  ref.invalidate(agentPerformanceProvider);
+                }
+              },
+              backgroundColor: sdGreenBaobab,
+              foregroundColor: Colors.white,
+              icon: const Icon(Icons.person_add_outlined),
+              label: const Text('Ajouter'),
+            )
+          : null,
       body: RefreshIndicator(
         onRefresh: () async {
           ref.invalidate(agentListProvider);

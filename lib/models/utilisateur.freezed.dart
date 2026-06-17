@@ -28,6 +28,8 @@ mixin _$Utilisateur {
   String? get email => throw _privateConstructorUsedError;
   String? get telephone => throw _privateConstructorUsedError;
   int? get collectiviteId => throw _privateConstructorUsedError;
+  int? get roleOrganisationId => throw _privateConstructorUsedError;
+  List<String> get privileges => throw _privateConstructorUsedError;
   bool get twoFactorEnabled => throw _privateConstructorUsedError;
   bool get actif => throw _privateConstructorUsedError;
 
@@ -56,6 +58,8 @@ abstract class $UtilisateurCopyWith<$Res> {
     String? email,
     String? telephone,
     int? collectiviteId,
+    int? roleOrganisationId,
+    List<String> privileges,
     bool twoFactorEnabled,
     bool actif,
   });
@@ -83,6 +87,8 @@ class _$UtilisateurCopyWithImpl<$Res, $Val extends Utilisateur>
     Object? email = freezed,
     Object? telephone = freezed,
     Object? collectiviteId = freezed,
+    Object? roleOrganisationId = freezed,
+    Object? privileges = null,
     Object? twoFactorEnabled = null,
     Object? actif = null,
   }) {
@@ -116,6 +122,14 @@ class _$UtilisateurCopyWithImpl<$Res, $Val extends Utilisateur>
                 ? _value.collectiviteId
                 : collectiviteId // ignore: cast_nullable_to_non_nullable
                       as int?,
+            roleOrganisationId: freezed == roleOrganisationId
+                ? _value.roleOrganisationId
+                : roleOrganisationId // ignore: cast_nullable_to_non_nullable
+                      as int?,
+            privileges: null == privileges
+                ? _value.privileges
+                : privileges // ignore: cast_nullable_to_non_nullable
+                      as List<String>,
             twoFactorEnabled: null == twoFactorEnabled
                 ? _value.twoFactorEnabled
                 : twoFactorEnabled // ignore: cast_nullable_to_non_nullable
@@ -147,6 +161,8 @@ abstract class _$$UtilisateurImplCopyWith<$Res>
     String? email,
     String? telephone,
     int? collectiviteId,
+    int? roleOrganisationId,
+    List<String> privileges,
     bool twoFactorEnabled,
     bool actif,
   });
@@ -173,6 +189,8 @@ class __$$UtilisateurImplCopyWithImpl<$Res>
     Object? email = freezed,
     Object? telephone = freezed,
     Object? collectiviteId = freezed,
+    Object? roleOrganisationId = freezed,
+    Object? privileges = null,
     Object? twoFactorEnabled = null,
     Object? actif = null,
   }) {
@@ -206,6 +224,14 @@ class __$$UtilisateurImplCopyWithImpl<$Res>
             ? _value.collectiviteId
             : collectiviteId // ignore: cast_nullable_to_non_nullable
                   as int?,
+        roleOrganisationId: freezed == roleOrganisationId
+            ? _value.roleOrganisationId
+            : roleOrganisationId // ignore: cast_nullable_to_non_nullable
+                  as int?,
+        privileges: null == privileges
+            ? _value._privileges
+            : privileges // ignore: cast_nullable_to_non_nullable
+                  as List<String>,
         twoFactorEnabled: null == twoFactorEnabled
             ? _value.twoFactorEnabled
             : twoFactorEnabled // ignore: cast_nullable_to_non_nullable
@@ -230,9 +256,11 @@ class _$UtilisateurImpl implements _Utilisateur {
     this.email,
     this.telephone,
     this.collectiviteId,
+    this.roleOrganisationId,
+    final List<String> privileges = const <String>[],
     this.twoFactorEnabled = false,
     this.actif = true,
-  });
+  }) : _privileges = privileges;
 
   factory _$UtilisateurImpl.fromJson(Map<String, dynamic> json) =>
       _$$UtilisateurImplFromJson(json);
@@ -252,6 +280,16 @@ class _$UtilisateurImpl implements _Utilisateur {
   @override
   final int? collectiviteId;
   @override
+  final int? roleOrganisationId;
+  final List<String> _privileges;
+  @override
+  @JsonKey()
+  List<String> get privileges {
+    if (_privileges is EqualUnmodifiableListView) return _privileges;
+    return EqualUnmodifiableListView(_privileges);
+  }
+
+  @override
   @JsonKey()
   final bool twoFactorEnabled;
   @override
@@ -260,7 +298,7 @@ class _$UtilisateurImpl implements _Utilisateur {
 
   @override
   String toString() {
-    return 'Utilisateur(id: $id, nom: $nom, prenom: $prenom, role: $role, email: $email, telephone: $telephone, collectiviteId: $collectiviteId, twoFactorEnabled: $twoFactorEnabled, actif: $actif)';
+    return 'Utilisateur(id: $id, nom: $nom, prenom: $prenom, role: $role, email: $email, telephone: $telephone, collectiviteId: $collectiviteId, roleOrganisationId: $roleOrganisationId, privileges: $privileges, twoFactorEnabled: $twoFactorEnabled, actif: $actif)';
   }
 
   @override
@@ -277,6 +315,12 @@ class _$UtilisateurImpl implements _Utilisateur {
                 other.telephone == telephone) &&
             (identical(other.collectiviteId, collectiviteId) ||
                 other.collectiviteId == collectiviteId) &&
+            (identical(other.roleOrganisationId, roleOrganisationId) ||
+                other.roleOrganisationId == roleOrganisationId) &&
+            const DeepCollectionEquality().equals(
+              other._privileges,
+              _privileges,
+            ) &&
             (identical(other.twoFactorEnabled, twoFactorEnabled) ||
                 other.twoFactorEnabled == twoFactorEnabled) &&
             (identical(other.actif, actif) || other.actif == actif));
@@ -293,6 +337,8 @@ class _$UtilisateurImpl implements _Utilisateur {
     email,
     telephone,
     collectiviteId,
+    roleOrganisationId,
+    const DeepCollectionEquality().hash(_privileges),
     twoFactorEnabled,
     actif,
   );
@@ -320,6 +366,8 @@ abstract class _Utilisateur implements Utilisateur {
     final String? email,
     final String? telephone,
     final int? collectiviteId,
+    final int? roleOrganisationId,
+    final List<String> privileges,
     final bool twoFactorEnabled,
     final bool actif,
   }) = _$UtilisateurImpl;
@@ -341,6 +389,10 @@ abstract class _Utilisateur implements Utilisateur {
   String? get telephone;
   @override
   int? get collectiviteId;
+  @override
+  int? get roleOrganisationId;
+  @override
+  List<String> get privileges;
   @override
   bool get twoFactorEnabled;
   @override

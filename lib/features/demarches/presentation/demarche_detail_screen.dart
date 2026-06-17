@@ -5,6 +5,8 @@ import 'package:intl/intl.dart';
 
 import '../../../app/router.dart';
 import '../../../app/theme.dart';
+import '../../../core/auth/permission_service.dart';
+import '../../../core/auth/privilege.dart';
 import '../../../shared_ui/empty_view.dart';
 import '../../../shared_ui/responsive.dart';
 import '../../../shared_ui/section_card.dart';
@@ -62,6 +64,8 @@ class _Body extends StatelessWidget {
     final padding = twoCols
         ? const EdgeInsets.symmetric(horizontal: 32, vertical: 24)
         : const EdgeInsets.all(16);
+    final canManage =
+        ref.watch(permissionServiceProvider).has(Privilege.gererProcedures);
 
     final header = _Header(demarche: demarche, money: money);
     final docs = SectionCard(
@@ -184,16 +188,20 @@ class _Body extends StatelessWidget {
                   criteres,
                 ]),
               ),
-              const SizedBox(width: 16),
-              Expanded(flex: 2, child: admin),
+              if (canManage) ...[
+                const SizedBox(width: 16),
+                Expanded(flex: 2, child: admin),
+              ],
             ],
           )
         else ...[
           docs,
           const SizedBox(height: 16),
           criteres,
-          const SizedBox(height: 16),
-          admin,
+          if (canManage) ...[
+            const SizedBox(height: 16),
+            admin,
+          ],
         ],
         const SizedBox(height: 24),
       ],

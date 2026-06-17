@@ -2,8 +2,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../core/auth/permission_service.dart';
+import '../core/auth/privilege.dart';
 import '../features/auth/presentation/auth_controller.dart';
 import '../features/auth/presentation/login_screen.dart';
+import '../features/chatbot/presentation/chatbot_screen.dart';
 import '../features/dashboard/presentation/dashboard_screen.dart';
 import '../features/demarches/presentation/demarche_detail_screen.dart';
 import '../features/demarches/presentation/demarches_screen.dart';
@@ -24,6 +27,7 @@ class AppRoute {
   static const String demarches = '/demarches';
   static const String notifications = '/notifications';
   static const String profile = '/profile';
+  static const String chatbot = '/chatbot';
 }
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -36,6 +40,19 @@ final routerProvider = Provider<GoRouter>((ref) {
       final goingToLogin = state.matchedLocation == AppRoute.login;
       if (!isLogged && !goingToLogin) return AppRoute.login;
       if (isLogged && goingToLogin) return AppRoute.dashboard;
+
+      // Garde RBAC : URL tapee a la main vers une section interdite -> accueil.
+      // Source unique de verite cote app, alignee sur _allDestinations du shell.
+      final perms = ref.read(permissionServiceProvider);
+      final loc = state.matchedLocation;
+      if (loc.startsWith(AppRoute.dossiers) &&
+          !perms.has(Privilege.gererDossiers)) {
+        return AppRoute.dashboard;
+      }
+      if (loc.startsWith(AppRoute.team) &&
+          !perms.has(Privilege.gererUtilisateurs)) {
+        return AppRoute.dashboard;
+      }
       return null;
     },
     refreshListenable: _AuthListenable(ref),
@@ -99,6 +116,10 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: AppRoute.profile,
             builder: (_, _) => const ProfileScreen(),
+          ),
+          GoRoute(
+            path: AppRoute.chatbot,
+            builder: (_, _) => const ChatbotScreen(),
           ),
         ],
       ),

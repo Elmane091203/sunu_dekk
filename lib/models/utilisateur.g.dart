@@ -14,8 +14,17 @@ _$UtilisateurImpl _$$UtilisateurImplFromJson(Map<String, dynamic> json) =>
       role: $enumDecode(_$RoleUtilisateurEnumMap, json['role']),
       email: json['email'] as String?,
       telephone: json['telephone'] as String?,
-      collectiviteId: (json['collectiviteId'] as num?)?.toInt(),
-      twoFactorEnabled: json['twoFactorEnabled'] as bool? ?? false,
+      collectiviteId: (json['collectiviteId'] as num?)?.toInt() ??
+          (json['collectivite_id'] as num?)?.toInt(),
+      roleOrganisationId: (json['roleOrganisationId'] as num?)?.toInt() ??
+          (json['role_organisation_id'] as num?)?.toInt(),
+      privileges: (json['privileges'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          const <String>[],
+      twoFactorEnabled: json['twoFactorEnabled'] as bool? ??
+          json['two_factor_enabled'] as bool? ??
+          false,
       actif: json['actif'] as bool? ?? true,
     );
 
@@ -28,6 +37,8 @@ Map<String, dynamic> _$$UtilisateurImplToJson(_$UtilisateurImpl instance) =>
       'email': instance.email,
       'telephone': instance.telephone,
       'collectiviteId': instance.collectiviteId,
+      'roleOrganisationId': instance.roleOrganisationId,
+      'privileges': instance.privileges,
       'twoFactorEnabled': instance.twoFactorEnabled,
       'actif': instance.actif,
     };

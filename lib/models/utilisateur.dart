@@ -20,6 +20,8 @@ class Utilisateur with _$Utilisateur {
     String? email,
     String? telephone,
     int? collectiviteId,
+    int? roleOrganisationId,
+    @Default(<String>[]) List<String> privileges,
     @Default(false) bool twoFactorEnabled,
     @Default(true) bool actif,
   }) = _Utilisateur;

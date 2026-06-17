@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 
 import '../../../app/router.dart';
 import '../../../app/theme.dart';
+import '../../../core/auth/permission_service.dart';
+import '../../../core/auth/privilege.dart';
 import '../../../shared_ui/empty_view.dart';
 import '../../../shared_ui/responsive.dart';
 import '../data/dossier_repository_impl.dart';
@@ -204,8 +206,11 @@ class _Swipeable extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final allowSwipe =
-        dossier.statut != 'cloture' && dossier.statut != 'rejete';
+    final canChangerStatut =
+        ref.watch(permissionServiceProvider).has(Privilege.changerStatut);
+    final allowSwipe = canChangerStatut &&
+        dossier.statut != 'cloture' &&
+        dossier.statut != 'rejete';
 
     if (!allowSwipe) {
       return DossierTile(dossier: dossier, onTap: onTap);

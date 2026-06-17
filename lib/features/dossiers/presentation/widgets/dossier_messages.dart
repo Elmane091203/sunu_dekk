@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../app/theme.dart';
+import '../../../../core/auth/permission_service.dart';
+import '../../../../core/auth/privilege.dart';
 import '../../../auth/presentation/auth_controller.dart';
 import '../../data/message_repository.dart';
 import '../../domain/message.dart';
@@ -51,6 +53,8 @@ class _DossierMessagesState extends ConsumerState<DossierMessages> {
   Widget build(BuildContext context) {
     final async = ref.watch(dossierMessagesProvider(widget.dossierId));
     final me = ref.watch(authControllerProvider).valueOrNull?.id ?? 0;
+    final canSend =
+        ref.watch(permissionServiceProvider).has(Privilege.envoyerMessages);
 
     return Column(
       children: [
@@ -111,46 +115,48 @@ class _DossierMessagesState extends ConsumerState<DossierMessages> {
             },
           ),
         ),
-        const SizedBox(height: 8),
-        Row(
-          children: [
-            Expanded(
-              child: TextField(
-                controller: _ctl,
-                decoration: const InputDecoration(
-                  hintText: 'Écrire un message...',
-                  contentPadding:
-                      EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        if (canSend) ...[
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _ctl,
+                  decoration: const InputDecoration(
+                    hintText: 'Écrire un message...',
+                    contentPadding:
+                        EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  ),
+                  minLines: 1,
+                  maxLines: 4,
+                  textInputAction: TextInputAction.newline,
                 ),
-                minLines: 1,
-                maxLines: 4,
-                textInputAction: TextInputAction.newline,
               ),
-            ),
-            const SizedBox(width: 8),
-            SizedBox(
-              height: 48,
-              width: 48,
-              child: FilledButton(
-                style: FilledButton.styleFrom(
-                  padding: EdgeInsets.zero,
-                  shape: const CircleBorder(),
+              const SizedBox(width: 8),
+              SizedBox(
+                height: 48,
+                width: 48,
+                child: FilledButton(
+                  style: FilledButton.styleFrom(
+                    padding: EdgeInsets.zero,
+                    shape: const CircleBorder(),
+                  ),
+                  onPressed: _sending ? null : _send,
+                  child: _sending
+                      ? const SizedBox(
+                          height: 18,
+                          width: 18,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
+                        )
+                      : const Icon(Icons.send, size: 18),
                 ),
-                onPressed: _sending ? null : _send,
-                child: _sending
-                    ? const SizedBox(
-                        height: 18,
-                        width: 18,
-                        child: CircularProgressIndicator(
-                          color: Colors.white,
-                          strokeWidth: 2,
-                        ),
-                      )
-                    : const Icon(Icons.send, size: 18),
               ),
-            ),
-          ],
-        ),
+            ],
+          ),
+        ],
       ],
     );
   }

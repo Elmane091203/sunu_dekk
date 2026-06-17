@@ -5,6 +5,8 @@ import 'package:intl/intl.dart';
 
 import '../../../app/router.dart';
 import '../../../app/theme.dart';
+import '../../../core/auth/permission_service.dart';
+import '../../../core/auth/privilege.dart';
 import '../../../shared_ui/empty_view.dart';
 import '../../../shared_ui/responsive.dart';
 import '../../../shared_ui/section_card.dart';
@@ -58,12 +60,20 @@ class DossierDetailScreen extends ConsumerWidget {
         data: (d) => _Body(detail: d),
       ),
       floatingActionButton: async.maybeWhen(
-        data: (d) => _DocsFab(
-          dossierId: d.id,
-          onChanged: () {
-            ref.invalidate(dossierDetailProvider(dossierId));
-          },
-        ),
+        data: (d) {
+          final perms = ref.read(permissionServiceProvider);
+          final canScan = perms.has(Privilege.gererDossiers);
+          final canSign = perms.has(Privilege.changerStatut);
+          if (!canScan && !canSign) return null;
+          return _DocsFab(
+            dossierId: d.id,
+            canScan: canScan,
+            canSign: canSign,
+            onChanged: () {
+              ref.invalidate(dossierDetailProvider(dossierId));
+            },
+          );
+        },
         orElse: () => null,
       ),
     );
@@ -73,8 +83,15 @@ class DossierDetailScreen extends ConsumerWidget {
 /// SpeedDial maison : un bouton qui s'expand en deux mini-FABs (scan, signature).
 class _DocsFab extends StatefulWidget {
   final int dossierId;
+  final bool canScan;
+  final bool canSign;
   final VoidCallback onChanged;
-  const _DocsFab({required this.dossierId, required this.onChanged});
+  const _DocsFab({
+    required this.dossierId,
+    required this.canScan,
+    required this.canSign,
+    required this.onChanged,
+  });
 
   @override
   State<_DocsFab> createState() => _DocsFabState();
@@ -121,22 +138,22 @@ class _DocsFabState extends State<_DocsFab>
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        if (_open)
+        if (_open && widget.canSign)
           _MiniFab(
             icon: Icons.edit_outlined,
             label: 'Signature',
             onTap: () =>
                 _open_(() => SignatureSheet.show(context, widget.dossierId)),
           ),
-        if (_open) const SizedBox(height: 12),
-        if (_open)
+        if (_open && widget.canSign) const SizedBox(height: 12),
+        if (_open && widget.canScan)
           _MiniFab(
             icon: Icons.document_scanner_outlined,
             label: 'Scanner',
             onTap: () =>
                 _open_(() => ScanDocumentSheet.show(context, widget.dossierId)),
           ),
-        if (_open) const SizedBox(height: 12),
+        if (_open && widget.canScan) const SizedBox(height: 12),
         FloatingActionButton(
           backgroundColor: sdGreenBaobab,
           foregroundColor: Colors.white,
@@ -465,6 +482,10 @@ class _Actions extends ConsumerWidget {
       );
     }
 
+    final perms = ref.watch(permissionServiceProvider);
+    final canChange = perms.has(Privilege.changerStatut);
+    final canAssign = perms.has(Privilege.assignerDossiers);
+
     Future<void> run({
       required Future<void> Function(String?) call,
       required String label,
@@ -489,8 +510,8 @@ class _Actions extends ConsumerWidget {
     }
 
     final repo = ref.read(dossierRepositoryProvider);
-    return Column(
-      children: [
+    final buttons = <Widget>[
+      if (canChange)
         SizedBox(
           width: double.infinity,
           child: FilledButton.icon(
@@ -503,7 +524,7 @@ class _Actions extends ConsumerWidget {
             ),
           ),
         ),
-        const SizedBox(height: 10),
+      if (canAssign)
         SizedBox(
           width: double.infinity,
           child: OutlinedButton.icon(
@@ -525,7 +546,7 @@ class _Actions extends ConsumerWidget {
             },
           ),
         ),
-        const SizedBox(height: 10),
+      if (canChange)
         SizedBox(
           width: double.infinity,
           child: OutlinedButton.icon(
@@ -541,7 +562,7 @@ class _Actions extends ConsumerWidget {
             ),
           ),
         ),
-        const SizedBox(height: 10),
+      if (canChange)
         SizedBox(
           width: double.infinity,
           child: OutlinedButton.icon(
@@ -557,6 +578,24 @@ class _Actions extends ConsumerWidget {
             ),
           ),
         ),
+    ];
+
+    if (buttons.isEmpty) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: 12),
+        child: Text(
+          'Vous n\'avez pas les droits pour agir sur ce dossier.',
+          style: TextStyle(color: sdTextSecondary),
+        ),
+      );
+    }
+
+    return Column(
+      children: [
+        for (var i = 0; i < buttons.length; i++) ...[
+          buttons[i],
+          if (i < buttons.length - 1) const SizedBox(height: 10),
+        ],
       ],
     );
   }

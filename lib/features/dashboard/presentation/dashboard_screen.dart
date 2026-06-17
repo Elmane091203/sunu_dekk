@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 
 import '../../../app/router.dart';
 import '../../../app/theme.dart';
+import '../../../core/auth/permission_service.dart';
+import '../../../core/auth/privilege.dart';
 import '../../../shared_ui/empty_view.dart';
 import '../../../shared_ui/responsive.dart';
 import '../../../shared_ui/section_card.dart';
@@ -19,7 +21,9 @@ class DashboardScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final statsAsync = ref.watch(dashboardStatsProvider);
+    final canSeeStats = ref
+        .watch(permissionServiceProvider)
+        .has(Privilege.voirStats);
     final isTablet = context.isTablet;
 
     return Scaffold(
@@ -27,16 +31,13 @@ class DashboardScreen extends ConsumerWidget {
       appBar: AppBar(
         toolbarHeight: 64,
         titleSpacing: 12,
-        // On retire le sous-texte "Bonjour {prenom}" en haut : il fait doublon
-        // avec le profil et provoque des overflows sur 360dp + 3 actions.
-        // Le prenom reste dans le PopupMenu profil.
         title: Row(
           children: [
-            const SunuLogoWordmark(logoSize: 100, version: SunuLogoVersion.logo1, showTagline: false),
-            const SizedBox(width: 10),
+            const SunuLogo(size: 32),
+            const SizedBox(width: 5),
             const Expanded(
               child: Text(
-                'Centre de commandement',
+                'Tableau de bord',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
@@ -66,24 +67,44 @@ class DashboardScreen extends ConsumerWidget {
           ),
           const SizedBox(width: 4),
         ],
+        backgroundColor: sdSurface,
       ),
-      body: RefreshIndicator(
-        onRefresh: () async => ref.invalidate(dashboardStatsProvider),
-        child: statsAsync.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (e, _) => EmptyView(
-            icon: Icons.cloud_off_outlined,
-            title: 'Données indisponibles',
-            message: e.toString(),
-            action: FilledButton.icon(
-              onPressed: () => ref.invalidate(dashboardStatsProvider),
-              icon: const Icon(Icons.refresh),
-              label: const Text('Réessayer'),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => context.go(AppRoute.chatbot),
+
+        backgroundColor: sdGreenBaobab,
+        foregroundColor: Colors.white,
+        icon: const Icon(Icons.smart_toy_outlined),
+        label: const Text('Assistant IA'),
+      ),
+      body: canSeeStats
+          ? RefreshIndicator(
+              onRefresh: () async => ref.invalidate(dashboardStatsProvider),
+              child: ref
+                  .watch(dashboardStatsProvider)
+                  .when(
+                    loading: () =>
+                        const Center(child: CircularProgressIndicator()),
+                    error: (e, _) => EmptyView(
+                      icon: Icons.cloud_off_outlined,
+                      title: 'Données indisponibles',
+                      message: e.toString(),
+                      action: FilledButton.icon(
+                        onPressed: () => ref.invalidate(dashboardStatsProvider),
+                        icon: const Icon(Icons.refresh),
+                        label: const Text('Réessayer'),
+                      ),
+                    ),
+                    data: (stats) =>
+                        _DashboardBody(stats: stats, twoCols: isTablet),
+                  ),
+            )
+          : const EmptyView(
+              icon: Icons.bar_chart_outlined,
+              title: 'Tableau de bord indisponible',
+              message:
+                  'Votre rôle ne donne pas accès aux statistiques. Utilisez les autres onglets pour travailler.',
             ),
-          ),
-          data: (stats) => _DashboardBody(stats: stats, twoCols: isTablet),
-        ),
-      ),
     );
   }
 }
@@ -123,8 +144,6 @@ class _DashboardBody extends StatelessWidget {
       children: [
         kpiGrid,
         const SizedBox(height: 16),
-        const _QuickActions(),
-        const SizedBox(height: 16),
         if (twoCols)
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -143,94 +162,6 @@ class _DashboardBody extends StatelessWidget {
         catCard,
         const SizedBox(height: 24),
       ],
-    );
-  }
-}
-
-class _QuickActions extends StatelessWidget {
-  const _QuickActions();
-
-  @override
-  Widget build(BuildContext context) {
-    final actions = [
-      (Icons.folder_outlined, 'Dossiers', sdGreenBaobab, AppRoute.dossiers),
-      (Icons.groups_outlined, 'Équipe', sdGreenDigital, AppRoute.team),
-      (
-        Icons.assignment_outlined,
-        'Démarches',
-        sdGoldTeranga,
-        AppRoute.demarches,
-      ),
-    ];
-    return Row(
-      children: [
-        for (var i = 0; i < actions.length; i++) ...[
-          Expanded(
-            child: _QuickAction(
-              icon: actions[i].$1,
-              label: actions[i].$2,
-              color: actions[i].$3,
-              onTap: () => context.go(actions[i].$4),
-            ),
-          ),
-          if (i < actions.length - 1) const SizedBox(width: 12),
-        ],
-      ],
-    );
-  }
-}
-
-class _QuickAction extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final Color color;
-  final VoidCallback onTap;
-  const _QuickAction({
-    required this.icon,
-    required this.label,
-    required this.color,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: sdSurface,
-      borderRadius: BorderRadius.circular(sdRadiusMd),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(sdRadiusMd),
-        onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 10),
-          decoration: BoxDecoration(
-            border: Border.all(color: const Color(0xFFE2E8E6)),
-            borderRadius: BorderRadius.circular(sdRadiusMd),
-          ),
-          child: Column(
-            children: [
-              Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.14),
-                  borderRadius: BorderRadius.circular(sdRadiusSm),
-                ),
-                child: Icon(icon, color: color, size: 18),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }

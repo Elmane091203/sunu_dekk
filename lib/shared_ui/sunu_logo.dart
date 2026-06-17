@@ -27,7 +27,7 @@ class SunuLogo extends StatelessWidget {
       _assetPath,
       width: size,
       height: size,
-      fit: BoxFit.contain,
+      fit: BoxFit.fill,
     );
   }
 }

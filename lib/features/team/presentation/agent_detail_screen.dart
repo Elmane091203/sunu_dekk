@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 
 import '../../../app/router.dart';
 import '../../../app/theme.dart';
+import '../../../core/auth/permission_service.dart';
+import '../../../core/auth/privilege.dart';
 import '../../../shared_ui/empty_view.dart';
 import '../../../shared_ui/responsive.dart';
 import '../../../shared_ui/section_card.dart';
@@ -72,6 +74,8 @@ class _Body extends StatelessWidget {
     final padding = twoCols
         ? const EdgeInsets.symmetric(horizontal: 32, vertical: 24)
         : const EdgeInsets.all(16);
+    final canManage =
+        ref.watch(permissionServiceProvider).has(Privilege.gererUtilisateurs);
 
     final header = _Header(agent: agent);
     final infos = SectionCard(
@@ -178,16 +182,20 @@ class _Body extends StatelessWidget {
                   children: [infos, const SizedBox(height: 16), perfCard],
                 ),
               ),
-              const SizedBox(width: 16),
-              Expanded(child: actions),
+              if (canManage) ...[
+                const SizedBox(width: 16),
+                Expanded(child: actions),
+              ],
             ],
           )
         else ...[
           infos,
           const SizedBox(height: 16),
           perfCard,
-          const SizedBox(height: 16),
-          actions,
+          if (canManage) ...[
+            const SizedBox(height: 16),
+            actions,
+          ],
         ],
         const SizedBox(height: 24),
       ],

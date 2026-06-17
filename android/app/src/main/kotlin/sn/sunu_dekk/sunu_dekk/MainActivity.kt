@@ -1,4 +1,4 @@
-package sn.sunu_dekk.sunu_dekk
+package sn.sunudekk.app
 
 import io.flutter.embedding.android.FlutterActivity
 
