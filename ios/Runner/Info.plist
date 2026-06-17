@@ -4,6 +4,12 @@
 <dict>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>L'application a besoin de la camera pour scanner les pieces jointes des dossiers.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>L'application a besoin d'acceder a vos photos pour joindre un document a un dossier.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Non utilise.</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
