@@ -53,6 +53,8 @@ dev_dependencies:
   freezed: ^2.5.7
   json_serializable: ^6.8.0
   riverpod_generator: ^2.6.3
+  flutter_launcher_icons: ^0.14.2
+  flutter_native_splash: ^2.4.4
 
 dependency_overrides:
   # analyzer_plugin 0.12.0 est incompatible avec analyzer 7.x.
@@ -64,3 +66,15 @@ flutter:
   assets:
     - assets/brand/logo1.svg
     - assets/brand/logo2.svg
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/brand/logoSunu.png"
+  image_path_ios: "assets/brand/logoSunu.png"
+
+flutter_native_splash:
+  color: "#00ff27"
+  image: "assets/brand/logoSunu2.png"
+  android: true
+  ios: true
