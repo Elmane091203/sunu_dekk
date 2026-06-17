@@ -1,5 +1,5 @@
 /// Hierarchie d'erreurs metier. Les widgets ne doivent JAMAIS catcher
-/// directement DioException ou Exception — toujours convertir en Failure
+/// directement DioException ou Exception - toujours convertir en Failure
 /// dans la couche data, puis remonter Failure aux providers / widgets.
 sealed class Failure implements Exception {
   final String message;
@@ -10,7 +10,9 @@ sealed class Failure implements Exception {
 }
 
 class NetworkFailure extends Failure {
-  const NetworkFailure([super.message = 'Connexion impossible. Verifiez votre reseau.']);
+  const NetworkFailure([
+    super.message = 'Connexion impossible. Verifiez votre reseau.',
+  ]);
 }
 
 class ServerFailure extends Failure {
@@ -29,4 +31,11 @@ class ValidationFailure extends Failure {
 
 class UnknownFailure extends Failure {
   const UnknownFailure([super.message = 'Une erreur inattendue est survenue.']);
+}
+
+/// Le backend a accepte les credentials mais reclame un second facteur.
+/// La presentation l'attrape pour basculer sur la saisie du code TOTP.
+class TwoFactorRequiredFailure extends Failure {
+  final int userId;
+  const TwoFactorRequiredFailure(this.userId) : super('Code 2FA requis');
 }
