@@ -43,3 +43,9 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Variables d'env locales : injectees via `flutter run --dart-define-from-file=.env.json`.
+# Ne JAMAIS commiter .env.json (clefs/URLs propres au poste). Le template .env.example.json est versionne.
+.env.json
+.env.*.json
+!.env.example.json

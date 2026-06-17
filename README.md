@@ -40,18 +40,35 @@ dart run build_runner build --delete-conflicting-outputs
 
 > ⚠️ La 2e commande génère les fichiers `*.freezed.dart` et `*.g.dart` pour les modèles. À relancer après toute modification de `lib/models/*.dart`.
 
+### Variables d'environnement
+
+Toutes les variables d'env de l'app sont passées en **compile-time** via `String.fromEnvironment` (voir `lib/app/constants.dart`). On utilise le mécanisme natif Flutter `--dart-define-from-file` (pas de package `dotenv`, pas d'IO au boot).
+
+```bash
+# 1. Copier le template versionné vers ton .env.json local (gitignoré)
+cp .env.example.json .env.json
+# 2. Adapter API_BASE_URL selon ta cible (émulateur / device / prod)
+```
+
+| Cible | Valeur à mettre dans `.env.json` |
+|---|---|
+| Émulateur Android | `http://10.0.2.2:5001/api` (défaut) |
+| iOS simulator / web | `http://localhost:5001/api` |
+| Device physique (même Wi-Fi) | `http://192.168.x.x:5001/api` |
+| Prod | `https://sunudekk-api.djazael.com/api` |
+
+Pour un build prod, créer un `.env.prod.json` (également gitignoré via le pattern `.env.*.json`).
+
 ### Lancement
 
 ```bash
-# Sur émulateur Android (utilise 10.0.2.2 pour atteindre Flask sur l'hôte)
-flutter run
+flutter run --dart-define-from-file=.env.json
 
-# Sur iOS simulator / web (utilise localhost)
-flutter run --dart-define=API_BASE_URL=http://localhost:5001/api
-
-# Sur appareil physique sur le même Wi-Fi (remplacer l'IP)
-flutter run --dart-define=API_BASE_URL=http://192.168.1.42:5001/api
+# Build APK prod
+flutter build apk --release --dart-define-from-file=.env.prod.json
 ```
+
+Sous VS Code, les profils sont câblés dans `.vscode/launch.json` (Run → "Sunu Dekk (dev, .env.json)").
 
 ### Tests
 

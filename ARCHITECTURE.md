@@ -1,4 +1,4 @@
-# Architecture technique — Sunu Dekk
+# Architecture technique - Sunu Dekk
 
 > Ce document est la **référence unique** pour les choix d'architecture du projet. Toute déviation doit être discutée en équipe et reportée ici.
 
