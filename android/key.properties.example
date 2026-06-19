@@ -1,0 +1,7 @@
+# Copier en android/key.properties (gitignore) puis renseigner avec ta keystore.
+# La keystore elle-meme doit etre stockee a un endroit SUR (idealement hors repo),
+# storeFile pointant en chemin absolu ou relatif au dossier android/.
+storeFile=../sunudekk-upload.jks
+storePassword=REMPLACER
+keyAlias=upload
+keyPassword=REMPLACER

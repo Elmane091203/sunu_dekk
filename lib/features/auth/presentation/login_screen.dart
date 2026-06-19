@@ -163,7 +163,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 obscureText: _obscure,
                 autofillHints: const [AutofillHints.password],
                 validator: (v) =>
-                    (v == null || v.length < 6) ? 'Trop court' : null,
+                    (v == null || v.isEmpty) ? 'Veuillez saisir votre mot de passe' : null,
                 onFieldSubmitted: (_) => _submit(),
               ),
               const SizedBox(height: 24),
