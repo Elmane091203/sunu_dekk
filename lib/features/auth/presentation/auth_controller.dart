@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/push/fcm_service.dart';
 import '../../../models/utilisateur.dart';
+import '../../dossiers/data/perimetre_repository.dart';
 import '../data/auth_repository_impl.dart';
 
 /// AsyncNotifier qui gere l'etat d'authentification.
@@ -19,6 +20,7 @@ class AuthController extends AsyncNotifier<Utilisateur?> {
     // etait deconnecte.
     if (user != null) {
       _syncPushToken(user.id);
+      _preloadPerimetre();
     }
     return user;
   }
@@ -38,7 +40,16 @@ class AuthController extends AsyncNotifier<Utilisateur?> {
     final user = state.valueOrNull;
     if (user != null) {
       _syncPushToken(user.id);
+      _preloadPerimetre();
     }
+  }
+
+  /// Pré-chauffe le périmètre offline (workflows + dossiers + collectivité)
+  /// en un seul appel. Idempotent et non-bloquant.
+  void _preloadPerimetre() {
+    ref.invalidate(perimetreProvider);
+    // ignore: unused_result
+    ref.read(perimetreProvider);
   }
 
   Future<void> signOut() async {
